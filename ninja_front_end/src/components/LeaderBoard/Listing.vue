@@ -1,7 +1,7 @@
 <template>
   <q-table
     ref="leaderBoard"
-    class="my-sticky-dynamic"
+    class="my-sticky-dynamic no-shadow"
     :data="data"
     :columns="columns"
     row-key="index"
