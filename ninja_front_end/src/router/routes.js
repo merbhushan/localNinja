@@ -11,6 +11,10 @@ const routes = [
     path: '/',
     component: () => import('pages/LeaderBoard.vue'),
   },
+  {
+    path: '/users',
+    component: () => import('pages/Users.vue'),
+  },
 
   // Always leave this as last one,
   // but you can also remove it

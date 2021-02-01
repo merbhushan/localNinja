@@ -19,3 +19,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::get('ninja/leader-board', [App\Http\Controllers\API\v1\NinjaLeaderBoardController::class, 'index']);
+Route::get('ninja/users', [App\Http\Controllers\API\v1\UserController::class, 'index']);

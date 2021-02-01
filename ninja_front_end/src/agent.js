@@ -167,3 +167,7 @@ export const isCancelRequest = (error) => axios.isCancel(error)
 export const LeaderBoard = {
   getScores: (params) => Requests.get('/ninja/leader-board', params),
 }
+
+export const UserAgent = {
+  getUsers: (params) => Requests.get('/ninja/users', params),
+}
