@@ -56,6 +56,8 @@
 
 <script>
 import { WebCam } from "vue-web-cam";
+import { mapGetters } from "vuex";
+
 export default {
   name: "App",
   components: {
@@ -63,7 +65,7 @@ export default {
   },
   data() {
     return {
-      dialogState: true,
+      dialog: "createNinjaUser",
       img: null,
       camera: null,
       deviceId: null,
@@ -71,6 +73,22 @@ export default {
     };
   },
   computed: {
+    ...mapGetters("showcase", ["getDialogState", "getDialogProperties"]),
+    dialogState: {
+      get() {
+        return this.getDialogState(this.dialog);
+      },
+      set(val) {
+        this.$store.commit("showcase/updateDialogState", {
+          dialog: this.dialog,
+          val
+        });
+      }
+    },
+    properties() {
+      return this.getDialogProperties(this.dialog);
+    },
+
     device: function() {
       return this.devices.find(n => n.deviceId === this.deviceId);
     }

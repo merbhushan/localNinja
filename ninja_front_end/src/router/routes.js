@@ -13,7 +13,7 @@ const routes = [
   },
   {
     path: '/users',
-    component: () => import('pages/Users.vue'),
+    component: () => import('pages/Users_bkp.vue'),
   },
 
   // Always leave this as last one,
