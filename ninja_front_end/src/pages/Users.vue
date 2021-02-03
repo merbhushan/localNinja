@@ -213,6 +213,8 @@ export default {
 .my-sticky-header-table
   /* height or max-height is important */
   height: calc(100vh - 50px)
+  max-width: 1280px
+  margin: 0 auto
 
   .q-table__top,
   .q-table__bottom,
