@@ -1,20 +1,19 @@
 <template>
-  <q-table
-    ref="leaderBoard"
-    class="my-sticky-dynamic no-shadow"
-    :data="data"
-    :columns="columns"
-    row-key="id"
-    :rows-per-page-options="[0]"
-    no-data-label="I didn't find anything for you"
-    style="background-color: #0D223B; color: white;"
-    title="Ninja Users"
-    :pagination.sync="pagination"
-    :loading="loading"
-    :filter="filter"
-    @request="onRequest"
-  >
-    <template v-slot:top-right>
+  <div class="q-pa-md">
+    <q-table
+      class="my-sticky-header-table"
+      title="Ninja Users"
+      :data="data"
+      :columns="columns"
+      row-key="id"
+      :pagination.sync="pagination"
+      :loading="loading"
+      :filter="filter"
+      @request="onRequest"
+      style="background-color: #0D223B; color: white;"
+      flat
+    >
+      <template v-slot:top-right>
         <q-btn
           color="white"
           text-color="black"
@@ -40,36 +39,26 @@
           </template>
         </q-input>
       </template>
-    <template v-slot:no-data="{ icon, message, filter }">
-      <div class="full-width row flex-center text-accent q-gutter-sm">
-        <q-icon size="2em" name="sentiment_dissatisfied" />
-        <span> Well this is sad... {{ message }} </span>
-        <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
-      </div>
-    </template>
-    <template v-slot:body-cell-index="index">
-      <q-td :props="index">
-        <div>{{ index.pageIndex + 1 }}</div>
-      </q-td>
-    </template>
-  </q-table>
+      <template v-slot:body-cell-action="props">
+        <q-td :props="props">
+          <div class="q-pl-xl">
+            <q-btn flat color="standard" round icon="edit" />
+            <q-btn flat color="standard" round icon="delete" />
+          </div>
+        </q-td>
+      </template>
+    </q-table>
+    <CreateUserDialog />
+    <CaptureImage />
+  </div>
 </template>
 
 <script>
+import CreateUserDialog from "src/components/Dialog/CreateUser";
+import CaptureImage from "src/components/Dialog/CaptureImage";
 
 export default {
-  props: {
-    data: {
-      type: Array,
-      default: () => {
-        return [];
-      }
-    },
-    refreshData: {
-      type: Function,
-      default: () => {}
-    }
-  },
+  components: { CreateUserDialog, CaptureImage },
   data() {
     return {
       filter: "",
@@ -111,34 +100,7 @@ export default {
       filter: undefined
     });
   },
-  // mounted() {
-  //   this.scrollToEnd();
-
-  //   document.querySelector(".q-table__middle").onscroll = event => {
-  //     const targetElement = document.querySelector(".q-table__middle");
-  //     const targetHeight = getScrollHeight(targetElement);
-  //     if (
-  //       getScrollPosition(targetElement) + 1 >
-  //       targetHeight - targetElement.clientHeight
-  //     ) {
-  //       setTimeout(() => {
-  //         this.loading = true;
-  //         setScrollPosition(targetElement, 0, 100);
-  //         this.refreshData();
-  //       }, 5000);
-  //     }
-  //   };
-  // },
   methods: {
-    // scrollToEnd() {
-    //   setTimeout(async () => {
-    //     const targetElement = document.querySelector(".q-table__middle");
-    //     const targetHeight = getScrollHeight(targetElement);
-    //     // document.querySelector("table tr").clientHeight * 50;
-    //     const scrollTime = 45 * 1000;
-    //     setScrollPosition(targetElement, targetHeight, parseInt(scrollTime));
-    //   }, 2000);
-    // }
     onRequest(props) {
       const { page, rowsPerPage, sortBy, descending } = props.pagination;
       const filter = props.filter;
@@ -173,35 +135,66 @@ export default {
       });
       return;
     },
+
+    // emulate ajax call
+    // SELECT * FROM ... WHERE...LIMIT...
+    fetchFromServer(startRow, count, filter, sortBy, descending) {
+      const data = filter
+        ? this.original.filter(row => row.name.includes(filter))
+        : this.original.slice();
+
+      // handle sortBy
+      if (sortBy) {
+        const sortFn =
+          sortBy === "desc"
+            ? descending
+              ? (a, b) => (a.name > b.name ? -1 : a.name < b.name ? 1 : 0)
+              : (a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0)
+            : descending
+            ? (a, b) => parseFloat(b[sortBy]) - parseFloat(a[sortBy])
+            : (a, b) => parseFloat(a[sortBy]) - parseFloat(b[sortBy]);
+        data.sort(sortFn);
+      }
+
+      return data.slice(startRow, startRow + count);
+    },
+
+    // emulate 'SELECT count(*) FROM ...WHERE...'
+    getRowsNumberCount(filter) {
+      if (!filter) {
+        return this.original.length;
+      }
+      let count = 0;
+      this.original.forEach(treat => {
+        if (treat.name.includes(filter)) {
+          ++count;
+        }
+      });
+      return count;
+    }
   }
 };
 </script>
 
-<style scoped>
-html {
-  scroll-behavior: smooth;
-}
-.my-sticky-dynamic {
-  /* height or max-height is important */
-  height: 95vh;
-}
-body > table {
-  background-color: "#0D223B";
-}
-</style>
 <style lang="sass">
-.my-sticky-dynamic
+.my-sticky-header-table
+  /* height or max-height is important */
+  height: calc(100vh - 50px)
+
   .q-table__top,
   .q-table__bottom,
-  thead tr:first-child th /* bg color is important for th; just specify one */
+  thead tr:first-child th
+    /* bg color is important for th; just specify one */
+    background-color: #0D223B
 
   thead tr th
     position: sticky
     z-index: 1
-  /* this will be the loading indicator */
-  thead tr:last-child th
-    /* height of all previous header rows */
-    top: 48px
   thead tr:first-child th
     top: 0
+
+  /* this is when the loading indicator appears */
+  &.q-table--loading thead tr:last-child th
+    /* height of all previous header rows */
+    top: 48px
 </style>

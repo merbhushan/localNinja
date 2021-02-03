@@ -1,4 +1,3 @@
-
 const routes = [
   // {
   //   path: '/',
@@ -8,20 +7,20 @@ const routes = [
   //   ]
   // },
   {
-    path: '/',
-    component: () => import('pages/LeaderBoard.vue'),
+    path: "/",
+    component: () => import("pages/LeaderBoard.vue")
   },
   {
-    path: '/users',
-    component: () => import('pages/Users_bkp.vue'),
+    path: "/users",
+    component: () => import("pages/Users.vue")
   },
 
   // Always leave this as last one,
   // but you can also remove it
   {
-    path: '*',
-    component: () => import('pages/Error404.vue')
+    path: "*",
+    component: () => import("pages/Error404.vue")
   }
-]
+];
 
-export default routes
+export default routes;

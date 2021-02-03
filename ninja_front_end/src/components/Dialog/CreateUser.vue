@@ -1,75 +1,88 @@
 <template>
-  <q-dialog v-model="dialogState">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-6">
-          <h2>Current Camera</h2>
-          <code v-if="device">{{ device.label }}</code>
-          <div class="border">
-            <vue-web-cam
-              ref="webcam"
-              :device-id="deviceId"
-              width="100%"
-              @started="onStarted"
-              @stopped="onStopped"
-              @error="onError"
-              @cameras="onCameras"
-              @camera-change="onCameraChange"
+  <q-dialog v-model="dialogState" position="bottom" full-width>
+    <q-card>
+      <q-card-section>
+        <div class="text-h6">Terms of Agreement</div>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section
+        style="max-height: 50vh; max-width: 50%;"
+        class="scroll relative-center"
+      >
+        <q-form @submit="onSubmit" class="q-gutter-md">
+          <q-input
+            filled
+            v-model="name"
+            label="Name *"
+            lazy-rules
+            :rules="[
+              val => (val && val.length > 0) || 'Please Enter Name',
+              val =>
+                (val && /^[A-Za-z-' ]+$/.test(val)) ||
+                'Please enter characters only'
+            ]"
+          />
+
+          <div class="col-12">
+            <q-toggle
+              size="md"
+              v-model="isFresh"
+              label="Fresh"
+              left-label
+              class="q-toggle-full"
             />
           </div>
 
-          <div class="row">
-            <div class="col-md-12">
-              <select v-model="camera">
-                <option>-- Select Device --</option>
-                <option
-                  v-for="device in devices"
-                  :key="device.deviceId"
-                  :value="device.deviceId"
-                  >{{ device.label }}</option
-                >
-              </select>
-            </div>
-            <div class="col-md-12">
-              <button type="button" class="btn btn-primary" @click="onCapture">
-                Capture Photo
-              </button>
-              <button type="button" class="btn btn-danger" @click="onStop">
-                Stop Camera
-              </button>
-              <button type="button" class="btn btn-success" @click="onStart">
-                Start Camera
-              </button>
-            </div>
+          <div>
+            <q-avatar size="28px">
+              <img src="https://cdn.quasar.dev/app-icons/icon-128x128.png" />
+            </q-avatar>
+            <q-btn
+              label="Capture New"
+              @click="
+                () => {
+                  $store.commit('showcase/updateDialogState', {
+                    dialog: 'captureImage',
+                    val: true,
+                    parentDialog: this.dialog
+                  });
+                }
+              "
+              color="primary"
+            />
           </div>
-        </div>
-        <div class="col-md-6">
-          <h2>Captured Image</h2>
-          <figure class="figure">
-            <img :src="img" class="img-responsive" />
-          </figure>
-        </div>
-      </div>
-    </div>
+        </q-form>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-actions align="right">
+        <q-btn label="Submit" type="submit" color="primary" />
+        <q-btn
+          label="Reset"
+          type="reset"
+          color="primary"
+          flat
+          class="q-ml-sm"
+        />
+      </q-card-actions>
+    </q-card>
   </q-dialog>
 </template>
 
 <script>
-import { WebCam } from "vue-web-cam";
 import { mapGetters } from "vuex";
 
 export default {
   name: "App",
-  components: {
-    "vue-web-cam": WebCam
-  },
   data() {
     return {
+      isFresh: false,
       dialog: "createNinjaUser",
-      img: null,
-      camera: null,
-      deviceId: null,
-      devices: []
+      name: null,
+      capturedImg: null
     };
   },
   computed: {
@@ -87,53 +100,33 @@ export default {
     },
     properties() {
       return this.getDialogProperties(this.dialog);
-    },
+    }
+  },
 
-    device: function() {
-      return this.devices.find(n => n.deviceId === this.deviceId);
-    }
-  },
-  watch: {
-    camera: function(id) {
-      this.deviceId = id;
-    },
-    devices: function() {
-      // Once we have a list select the first one
-      const [first, ...tail] = this.devices;
-      if (first) {
-        this.camera = first.deviceId;
-        this.deviceId = first.deviceId;
-      }
-    }
-  },
   methods: {
-    onCapture() {
-      this.img = this.$refs.webcam.capture();
+    onSubmit() {
+      console.log("on submit created");
     },
-    onStarted(stream) {
-      console.log("On Started Event", stream);
+    onReset() {
+      console.log("on reset created");
     },
-    onStopped(stream) {
-      console.log("On Stopped Event", stream);
-    },
-    onStop() {
-      this.$refs.webcam.stop();
-    },
-    onStart() {
-      this.$refs.webcam.start();
-    },
-    onError(error) {
-      console.log("On Error Event", error);
-    },
-    onCameras(cameras) {
-      this.devices = cameras;
-      console.log("On Cameras Event", cameras);
-    },
-    onCameraChange(deviceId) {
-      this.deviceId = deviceId;
-      this.camera = deviceId;
-      console.log("On Camera Change Event", deviceId);
+    onCapture(imageData) {
+      this.capturedImg = imageData;
     }
   }
 };
 </script>
+
+<style>
+.q-dialog__inner {
+  padding: 0px !important;
+}
+
+.q-toggle-full {
+  width: 100%;
+
+  .q-toggle__label {
+    flex: 1 0 0;
+  }
+}
+</style>

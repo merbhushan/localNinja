@@ -53,7 +53,6 @@
 
 <script>
 import CreateUserDialog from "src/components/Dialog/CreateUser";
-import { format } from "quasar";
 
 export default {
   components: { CreateUserDialog },
