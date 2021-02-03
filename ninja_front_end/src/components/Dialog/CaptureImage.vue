@@ -1,12 +1,12 @@
 <template>
-  <q-dialog v-model="dialogState" position="bottom" full-width>
+  <q-dialog v-model="dialogState" position="bottom">
     <q-card>
       <q-card-section>
-        <div class="text-h6">Terms of Agreement</div>
+        <div class="text-h6">Capture Image</div>
       </q-card-section>
 
       <q-separator />
-      <q-card-section style=" max-width: 50%;" class="scroll relative-center">
+      <q-card-section class="scroll relative-center">
         <q-select
           v-model="camera"
           :options="devices"
@@ -16,9 +16,9 @@
           map-options
         />
       </q-card-section>
-      <q-card-section style=" max-width: 50%;" class="scroll relative-center">
+      <q-card-section class="scroll relative-center">
         <div class="row">
-          <div class="col-md-6 border">
+          <div class="col-md-12 border">
             <vue-web-cam
               ref="webcam"
               height="250"
@@ -31,9 +31,9 @@
               @camera-change="onCameraChange"
             />
           </div>
-          <div class="col-md-6">
+          <div class="col-md-12" v-if="img" style="text-align: centered;">
             <figure class="figure">
-              <img :src="img" class="img-responsive" />
+              <q-img :src="img" class="img-responsive" />
             </figure>
           </div>
         </div>

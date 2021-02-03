@@ -1,21 +1,26 @@
 <template>
-  <q-dialog v-model="dialogState" position="bottom" full-width>
-    <q-card>
+  <q-dialog v-model="dialogState" position="bottom">
+    <q-card style="width: 40%;">
       <q-card-section>
-        <div class="text-h6">Terms of Agreement</div>
+        <q-toolbar class="q-pa-none">
+          <span class="text-h5">
+            Add User
+          </span>
+          <q-space />
+
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-toolbar>
       </q-card-section>
 
       <q-separator />
 
-      <q-card-section
-        style="max-height: 50vh; max-width: 50%;"
-        class="scroll relative-center"
-      >
+      <q-card-section style="max-height: 50vh;" class="scroll relative-center">
         <q-form @submit="onSubmit" class="q-gutter-md">
           <q-input
             filled
             v-model="name"
             label="Name *"
+            full-width
             lazy-rules
             :rules="[
               val => (val && val.length > 0) || 'Please Enter Name',
@@ -26,19 +31,29 @@
           />
 
           <div class="col-12">
-            <q-toggle
-              size="md"
-              v-model="isFresh"
-              label="Fresh"
-              left-label
-              class="q-toggle-full"
-            />
+            <q-toolbar class="q-pa-none">
+              <span class="text-h6">Gender:</span>
+              <q-radio
+                name="gender"
+                v-model="strGender"
+                val="MALE"
+                label="Male"
+              />
+              <q-radio
+                name="gender"
+                v-model="strGender"
+                val="FEMALE"
+                label="Female"
+              />
+            </q-toolbar>
           </div>
 
           <div>
-            <q-avatar size="28px">
-              <img src="https://cdn.quasar.dev/app-icons/icon-128x128.png" />
+            <q-avatar size="120px">
+              <img src="https://via.placeholder.com/120" />
             </q-avatar>
+          </div>
+          <div>
             <q-btn
               label="Capture New"
               @click="
@@ -79,6 +94,7 @@ export default {
   name: "App",
   data() {
     return {
+      strGender: "",
       isFresh: false,
       dialog: "createNinjaUser",
       name: null,

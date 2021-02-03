@@ -12,24 +12,14 @@
       @request="onRequest"
       style="background-color: #0D223B; color: white;"
       flat
+      dark
     >
       <template v-slot:top-right>
-        <q-btn
-          color="white"
-          text-color="black"
-          label="Add New"
-          class="q-mr-md"
-          @click="
-            $store.commit('showcase/updateDialogState', {
-              dialog: 'createNinjaUser',
-              val: true
-            })
-          "
-        />
         <q-input
-          borderless
           dense
+          outlined
           debounce="300"
+          class="q-mr-md"
           v-model="filter"
           placeholder="Search"
           dark
@@ -38,14 +28,46 @@
             <q-icon name="search" />
           </template>
         </q-input>
+
+        <q-btn
+          color="grey"
+          text-color="black"
+          label="Add New"
+          @click="
+            $store.commit('showcase/updateDialogState', {
+              dialog: 'createNinjaUser',
+              val: true
+            })
+          "
+        />
       </template>
-      <template v-slot:body-cell-action="props">
-        <q-td :props="props">
-          <div class="q-pl-xl">
-            <q-btn flat color="standard" round icon="edit" />
-            <q-btn flat color="standard" round icon="delete" />
-          </div>
-        </q-td>
+
+      <template v-slot:body="props">
+        <q-tr :props="props">
+          <template v-for="(col, index) in props.cols">
+            <q-td v-if="col.name == 'action'" style="text-align: center;">
+              <q-btn flat color="standard" round icon="edit" />
+              <q-btn flat color="standard" round icon="delete" />
+            </q-td>
+            <q-td v-else-if="col.name == 'avatar'" style="text-align: center;">
+              <q-img
+                src="/images/user-avatars/boy.png"
+                spinner-color="white"
+                v-if="Math.floor(Math.random() * 3) == 2"
+                style="height: 35px; width: 35px; border-radius: 50%;"
+              />
+              <q-img
+                src="/images/user-avatars/girl.png"
+                v-else
+                spinner-color="white"
+                style="height: 35px; width: 35px; border-radius: 50%;"
+              />
+            </q-td>
+            <q-td v-else>
+              {{ col.value }}
+            </q-td>
+          </template>
+        </q-tr>
       </template>
     </q-table>
     <CreateUserDialog />
@@ -73,13 +95,23 @@ export default {
           name: "id",
           required: true,
           label: "#ID",
-          align: "center",
+          align: "left",
+          headerStyle: "width: 3%;",
           field: "id"
+        },
+        {
+          name: "avatar",
+          required: true,
+          label: "Avatar",
+          headerStyle: "width: 5%;",
+          align: "center",
+          sortable: false
         },
         {
           name: "name",
           align: "left",
           label: "Name",
+          headerStyle: "width: 80%;",
           field: "name",
           sortable: true
         },
@@ -87,7 +119,8 @@ export default {
           name: "action",
           required: true,
           label: "Action",
-          align: "left"
+          headerStyle: "text-align: center;",
+          align: "center"
         }
       ],
       data: []
