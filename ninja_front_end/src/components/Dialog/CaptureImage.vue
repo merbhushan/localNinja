@@ -1,5 +1,11 @@
 <template>
-  <q-dialog v-model="dialogState" full-width position="bottom">
+  <q-dialog
+    v-model="dialogState"
+    position="bottom"
+    @show="onShow"
+    @before-hide="beforeHide"
+    full-width
+  >
     <q-card>
       <q-card-section style="padding: 10px 15px;">
         <div class="text-h5 middle-align" style="padding-left: 15px;">
@@ -34,7 +40,7 @@
           <div class="col-sm-12 col-md-6 border">
             <vue-web-cam
               ref="webcam"
-              height="250"
+              height="300"
               :selectFirstDevice="true"
               :device-id="deviceId"
               @started="onStarted"
@@ -46,8 +52,8 @@
           </div>
           <div class="col-sm-12 col-md-6" v-if="img">
             <q-img
-              height="250px"
-              width="250px"
+              height="300px"
+              width="400px"
               :src="img"
               class="img-responsive"
             />
@@ -69,6 +75,7 @@
           @click="saveAndContinue"
           :disabled="blnDisplayError"
           color="primary"
+          :disable="!img"
         />
         <q-btn
           label="Cancel"
@@ -91,10 +98,6 @@ export default {
     "vue-web-cam": WebCam
   },
   props: {
-    continue: {
-      type: Function,
-      default: () => {}
-    },
     emitEventOnSelect: {
       type: Boolean,
       default: false
@@ -146,8 +149,18 @@ export default {
     }
   },
   methods: {
+    onShow() {
+      this.onStart();
+      this.img = null;
+    },
+    beforeHide() {
+      this.onStop();
+    },
     saveAndContinue() {
-      this.continue(this.img);
+      console.log(this.properties);
+      if (this.properties && this.properties.continue) {
+        this.properties.continue(this.img);
+      }
       if (this.emitEventOnSelect) {
         this.$root.$emit("captured-image-data", this.img);
       }
