@@ -73,7 +73,15 @@
                   style="width: 120px;"
                   @click="
                     () => {
-                      $store.commit('showcase/updateDialogState', {
+                      this.$store.commit('showcase/SET_DIALOG_PROPERTIES', {
+                        dialog: 'captureImage',
+                        properties: {
+                          continue: this.onCapture
+                        },
+                        refresh: true
+                      });
+
+                      this.$store.commit('showcase/updateDialogState', {
                         dialog: 'captureImage',
                         val: true,
                         parentDialog: this.dialog
@@ -89,7 +97,14 @@
                   style="width: 120px;"
                   @click="
                     () => {
-                      $store.commit('showcase/updateDialogState', {
+                      this.$store.commit('showcase/SET_DIALOG_PROPERTIES', {
+                        dialog: 'captureImage',
+                        properties: {
+                          continue: this.onCapture
+                        },
+                        refresh: true
+                      });
+                      this.$store.commit('showcase/updateDialogState', {
                         dialog: 'captureImage',
                         val: true,
                         parentDialog: this.dialog
@@ -101,7 +116,9 @@
               </div>
             </div>
           </div>
-          <div></div>
+          <div>
+            {{ capturedImg }}
+          </div>
         </q-form>
       </q-card-section>
 
@@ -160,6 +177,7 @@ export default {
       console.log("on reset created");
     },
     onCapture(imageData) {
+      console.log("capture data", imageData);
       this.capturedImg = imageData;
     }
   }
