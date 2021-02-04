@@ -2,10 +2,9 @@
   <q-dialog v-model="dialogState" full-width position="bottom">
     <q-card>
       <q-card-section style="padding: 10px 15px;">
-        <div class="text-h5 middle-align">
+        <div class="text-h5 middle-align" style="padding-left: 15px;">
           Add User
         </div>
-        <q-space />
 
         <q-btn
           icon="close"
@@ -113,8 +112,7 @@
         <q-btn
           label="Reset"
           type="reset"
-          color="primary"
-          flat
+          style="background-color: #bf1d1d; color: white;"
           class="q-ml-sm"
         />
       </q-card-actions>

@@ -1,12 +1,26 @@
 <template>
-  <q-dialog v-model="dialogState" position="bottom">
+  <q-dialog v-model="dialogState" full-width position="bottom">
     <q-card>
-      <q-card-section>
-        <div class="text-h6">Capture Image</div>
+      <q-card-section style="padding: 10px 15px;">
+        <div class="text-h5 middle-align" style="padding-left: 15px;">
+          Capture Image
+        </div>
+
+        <q-btn
+          icon="close"
+          flat
+          round
+          dense
+          v-close-popup
+          style="position: absolute; top: 10px; right: 10px;"
+        />
       </q-card-section>
 
       <q-separator />
-      <q-card-section class="scroll relative-center">
+      <q-card-section style="max-height: 50vh;" class="middle-align scroll ">
+        <q-banner dense class="bg-red text-white" v-if="blnDisplayError">
+          Sorry! We were not able to detect your web cam.
+        </q-banner>
         <q-select
           v-model="camera"
           :options="devices"
@@ -15,10 +29,9 @@
           label="Select Device"
           map-options
         />
-      </q-card-section>
-      <q-card-section class="scroll relative-center">
-        <div class="row">
-          <div class="col-md-12 border">
+
+        <div class="row q-pt-sm">
+          <div class="col-sm-12 col-md-6 border">
             <vue-web-cam
               ref="webcam"
               height="250"
@@ -31,10 +44,13 @@
               @camera-change="onCameraChange"
             />
           </div>
-          <div class="col-md-12" v-if="img" style="text-align: centered;">
-            <figure class="figure">
-              <q-img :src="img" class="img-responsive" />
-            </figure>
+          <div class="col-sm-12 col-md-6" v-if="img">
+            <q-img
+              height="250px"
+              width="250px"
+              :src="img"
+              class="img-responsive"
+            />
           </div>
         </div>
       </q-card-section>
@@ -42,17 +58,22 @@
       <q-separator />
 
       <q-card-actions align="right">
-        <q-btn label="Capture" @click="onCapture" color="primary" />
+        <q-btn
+          label="Capture"
+          @click="onCapture"
+          :disabled="blnDisplayError"
+          color="primary"
+        />
         <q-btn
           label="Save & Continue"
           @click="saveAndContinue"
+          :disabled="blnDisplayError"
           color="primary"
         />
         <q-btn
           label="Cancel"
+          style="background-color: #bf1d1d; color: white;"
           v-close-popup
-          color="primary"
-          flat
           class="q-ml-sm"
         />
       </q-card-actions>
@@ -85,6 +106,7 @@ export default {
       name: null,
       img: null,
       camera: null,
+      blnDisplayError: false,
       deviceId: null,
       devices: []
     };
@@ -148,6 +170,7 @@ export default {
       this.$refs.webcam.start();
     },
     onError(error) {
+      this.blnDisplayError = true;
       console.log("On Error Event", error);
     },
     onCameras(cameras) {
