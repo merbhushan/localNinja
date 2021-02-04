@@ -61,12 +61,13 @@
           </div>
 
           <div class="row">
-            <div class="col-md-4 col-sm-12">
-              <q-avatar square size="240px">
-                <img src="https://via.placeholder.com/240" />
+            <div class="col-md-6 col-sm-12">
+              <q-avatar square class="ration-43">
+                <q-img v-if="capturedImg" :src="capturedImg" />
+                <q-img v-else src="https://via.placeholder.com/240" />
               </q-avatar>
             </div>
-            <div class="col-md-8 col-sm-12">
+            <div class="col-md-6 col-sm-12">
               <div>
                 <q-btn
                   label="Capture"
@@ -93,31 +94,24 @@
               </div>
               <div style="padding-top: 10px;">
                 <q-btn
-                  label="Upload"
+                  label="Gallery"
                   style="width: 120px;"
+                  color="primary"
                   @click="
                     () => {
-                      this.$store.commit('showcase/SET_DIALOG_PROPERTIES', {
-                        dialog: 'captureImage',
-                        properties: {
-                          continue: this.onCapture
-                        },
-                        refresh: true
-                      });
-                      this.$store.commit('showcase/updateDialogState', {
-                        dialog: 'captureImage',
-                        val: true,
-                        parentDialog: this.dialog
-                      });
+                      this.$refs.fileUpload.click();
                     }
                   "
-                  color="primary"
+                />
+                <input
+                  ref="fileUpload"
+                  style="display: none"
+                  type="file"
+                  id="fileUpload"
+                  @change="loadFileData($event)"
                 />
               </div>
             </div>
-          </div>
-          <div>
-            {{ capturedImg }}
           </div>
         </q-form>
       </q-card-section>
@@ -127,8 +121,8 @@
       <q-card-actions align="right" class="middle-align">
         <q-btn label="Submit" type="submit" color="primary" />
         <q-btn
-          label="Reset"
-          type="reset"
+          label="Cancel"
+          v-close-popup
           style="background-color: #bf1d1d; color: white;"
           class="q-ml-sm"
         />
@@ -148,7 +142,8 @@ export default {
       isFresh: false,
       dialog: "createNinjaUser",
       name: null,
-      capturedImg: null
+      capturedImg: null,
+      reader: new FileReader()
     };
   },
   computed: {
@@ -170,6 +165,11 @@ export default {
   },
 
   methods: {
+    loadFileData(event) {
+      if (event.target.files[0]) {
+        this.reader.readAsDataURL(event.target.files[0]);
+      }
+    },
     onSubmit() {
       console.log("on submit created");
     },
@@ -180,6 +180,11 @@ export default {
       console.log("capture data", imageData);
       this.capturedImg = imageData;
     }
+  },
+  mounted() {
+    this.reader.addEventListener("load", event => {
+      this.capturedImg = event.target.result;
+    });
   }
 };
 </script>
@@ -187,6 +192,11 @@ export default {
 <style>
 .q-dialog__inner {
   padding: 0px !important;
+}
+
+.ration-43 {
+  width: 400px;
+  height: 300px;
 }
 
 .middle-align {

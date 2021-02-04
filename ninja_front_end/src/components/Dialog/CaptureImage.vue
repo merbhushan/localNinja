@@ -40,7 +40,7 @@
           <div class="col-sm-12 col-md-6 border">
             <vue-web-cam
               ref="webcam"
-              height="250"
+              height="300"
               :selectFirstDevice="true"
               :device-id="deviceId"
               @started="onStarted"
@@ -52,8 +52,8 @@
           </div>
           <div class="col-sm-12 col-md-6" v-if="img">
             <q-img
-              height="250px"
-              width="250px"
+              height="300px"
+              width="400px"
               :src="img"
               class="img-responsive"
             />
