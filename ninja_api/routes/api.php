@@ -20,4 +20,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::get('ninja/leader-board', [App\Http\Controllers\API\v1\NinjaLeaderBoardController::class, 'index']);
 Route::get('ninja/users', [App\Http\Controllers\API\v1\UserController::class, 'index']);
-Route::post('ninja/user', [App\Http\Controllers\API\v1\UserController::class, 'store']);
+Route::post('ninja/users', [App\Http\Controllers\API\v1\UserController::class, 'store']);
+Route::delete('ninja/users/{user}', [App\Http\Controllers\API\v1\UserController::class, 'delete']);

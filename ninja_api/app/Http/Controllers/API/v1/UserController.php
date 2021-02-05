@@ -32,19 +32,34 @@ class UserController extends Controller
             'gender' => 'required|in:Male,Female',
             'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
         ]);
-        
+
         if ($objValidatedData->fails()){
             return $objValidatedData->errors();
         }
-        
+
         $strAvatarImageName = time().'.'.$request->avatar->getClientOriginalExtension(); // Might fail when there are multiple user created consequently.
         $request->file('avatar')->move('images/avatar/', $strAvatarImageName);
-        
+
         return User::create([
             'name' => $request->name,
             'avatar_file_original_name' => $request->avatar->getClientOriginalName(),
             'gender' => $request->gender,
-            'avatar' => $strAvatarImageName 
+            'avatar' => $strAvatarImageName
         ]);
+    }
+
+    public function delete(User $user){
+        if($user->delete())
+        {
+            return [
+                "message"=> "User deleted successfully",
+                "code"=> 1
+            ];
+        }
+
+        return [
+            "message"=> "Unexpected error occurred while deleting a user.",
+            "code"=> 0
+        ];
     }
 }

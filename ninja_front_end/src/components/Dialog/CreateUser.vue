@@ -35,7 +35,7 @@
                 :rules="[
                   val => (val && val.length > 0) || 'Please Enter Name',
                   val =>
-                    (val && /^[A-Za-z-' ]+$/.test(val)) ||
+                    (val && /^[A-Za-z-0-9_' ]+$/.test(val)) ||
                     'Please enter characters only'
                 ]"
               />
@@ -48,13 +48,13 @@
               <q-radio
                 name="gender"
                 v-model="strGender"
-                val="MALE"
+                val="Male"
                 label="Male"
               />
               <q-radio
                 name="gender"
                 v-model="strGender"
-                val="FEMALE"
+                val="Female"
                 label="Female"
               />
             </div>
@@ -119,7 +119,7 @@
       <q-separator />
 
       <q-card-actions align="right" class="middle-align">
-        <q-btn label="Submit" type="submit" color="primary" />
+        <q-btn label="Create" @click="createUser" color="primary" />
         <q-btn
           label="Cancel"
           v-close-popup
@@ -161,10 +161,36 @@ export default {
     },
     properties() {
       return this.getDialogProperties(this.dialog);
+    },
+    objRequest() {
+      var formData = new FormData();
+      formData.append("name", this.name);
+      formData.append("gender", this.strGender);
+      formData.append("avatar", this.dataURLtoFile(this.capturedImg));
+      return formData;
     }
   },
 
   methods: {
+    dataURLtoFile(dataurl) {
+      var arr = dataurl.split(","),
+        mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]),
+        n = bstr.length,
+        u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      let filename = this.name.trim() + "." + mime.split("/")[1];
+      return new File([u8arr], filename, { type: mime });
+    },
+    createUser() {
+      this.showSuccess("User created successfully.");
+      return;
+      // console.log(this.objRequest);
+      // return;
+      this.$store.dispatch("user/createUser", this.objRequest);
+    },
     loadFileData(event) {
       if (event.target.files[0]) {
         this.reader.readAsDataURL(event.target.files[0]);

@@ -12,14 +12,24 @@
       @request="onRequest"
       style="background-color: #0D223B; color: white;"
       flat
-      dark
     >
       <template v-slot:top-right>
-        <q-input
-          dense
-          outlined
-          debounce="300"
+        <q-btn
+          color="white"
+          text-color="black"
+          label="Add New"
           class="q-mr-md"
+          @click="
+            $store.commit('showcase/updateDialogState', {
+              dialog: 'createNinjaUser',
+              val: true
+            })
+          "
+        />
+        <q-input
+          borderless
+          dense
+          debounce="300"
           v-model="filter"
           placeholder="Search"
           dark
@@ -28,75 +38,21 @@
             <q-icon name="search" />
           </template>
         </q-input>
-
-        <q-btn
-          color="grey"
-          text-color="black"
-          label="Add New"
-          @click="
-            $store.commit('showcase/updateDialogState', {
-              dialog: 'createNinjaUser',
-              val: true
-            })
-          "
-        />
       </template>
-
-      <template v-slot:body="props">
-        <q-tr :props="props">
-          <template v-for="(col, index) in props.cols">
-            <q-td v-if="col.name == 'action'" style="text-align: center;">
-              <q-btn flat color="standard" round icon="edit" />
-              <q-btn
-                flat
-                color="standard"
-                @click="deleteUser(props.row)"
-                round
-                icon="delete"
-              />
-            </q-td>
-            <q-td v-else-if="col.name == 'avatar'" style="text-align: center;">
-              <q-img
-                :src="props.row.avatar_url"
-                spinner-color="white"
-                v-if="
-                  false &&
-                    props.row.avatar_url &&
-                    props.row.avatar_url.length > 0
-                "
-                style="height: 35px; width: 35px; border-radius: 50%;"
-              />
-              <q-img
-                v-else-if="props.row.gender == 'Female'"
-                src="/images/user-avatars/girl.png"
-                spinner-color="white"
-                style="height: 35px; width: 35px; border-radius: 50%;"
-              />
-              <q-img
-                v-else
-                src="/images/user-avatars/boy.png"
-                spinner-color="white"
-                style="height: 35px; width: 35px; border-radius: 50%;"
-              />
-            </q-td>
-            <q-td v-else>
-              {{ col.value }}
-            </q-td>
-          </template>
-        </q-tr>
+      <template v-slot:body-cell-action="props">
+        <q-td :props="props">
+          <div class="q-pl-xl">
+            <q-btn flat color="standard" round icon="edit" />
+            <q-btn flat color="standard" round icon="delete" />
+          </div>
+        </q-td>
       </template>
     </q-table>
-    <CreateUserDialog />
-    <CaptureImage />
   </div>
 </template>
 
 <script>
-import CreateUserDialog from "src/components/Dialog/CreateUser";
-import CaptureImage from "src/components/Dialog/CaptureImage";
-
 export default {
-  components: { CreateUserDialog, CaptureImage },
   data() {
     return {
       filter: "",
@@ -111,23 +67,13 @@ export default {
           name: "id",
           required: true,
           label: "#ID",
-          align: "left",
-          headerStyle: "width: 3%;",
-          field: "id"
-        },
-        {
-          name: "avatar",
-          required: true,
-          label: "Avatar",
-          headerStyle: "width: 5%;",
           align: "center",
-          sortable: false
+          field: "id"
         },
         {
           name: "name",
           align: "left",
           label: "Name",
-          headerStyle: "width: 80%;",
           field: "name",
           sortable: true
         },
@@ -135,8 +81,7 @@ export default {
           name: "action",
           required: true,
           label: "Action",
-          headerStyle: "text-align: center;",
-          align: "center"
+          align: "left"
         }
       ],
       data: []
@@ -184,12 +129,7 @@ export default {
       });
       return;
     },
-    deleteUser(data) {
-      this.$store.dispatch("user/deleteUser", data.id).then(response => {
-        console.log(response);
-      });
-      this.showSuccess("user deleted successfully");
-    },
+
     // emulate ajax call
     // SELECT * FROM ... WHERE...LIMIT...
     fetchFromServer(startRow, count, filter, sortBy, descending) {
@@ -234,8 +174,6 @@ export default {
 .my-sticky-header-table
   /* height or max-height is important */
   height: calc(100vh - 50px)
-  max-width: 1280px
-  margin: 0 auto
 
   .q-table__top,
   .q-table__bottom,
