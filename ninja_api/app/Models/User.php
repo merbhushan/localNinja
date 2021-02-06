@@ -50,4 +50,16 @@ class User extends Authenticatable
     public function getAvatarUrlAttribute(){
         return empty($this->avatar) ? null : asset('images/avatar/'.$this->avatar);
     }
+
+    // public function getAvatarAttribute($value){
+    //     if(empty($value)){
+    //         return null;
+    //     }
+
+    //     // dd($value);
+    //     return [
+    //         "fileName" => $value,
+    //         "url" => asset('images/avatar/'.$value)
+    //     ];
+    // }
 }

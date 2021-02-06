@@ -170,5 +170,6 @@ export const LeaderBoard = {
 export const UserAgent = {
   getUsers: params => Requests.get("/ninja/users", params),
   createUser: params => Requests.post("ninja/users", params),
+  updateUser: (userId, params) => Requests.post(`ninja/users/${userId}`, params),
   deleteUser: userId => Requests.del(`ninja/users/${userId}`)
 };

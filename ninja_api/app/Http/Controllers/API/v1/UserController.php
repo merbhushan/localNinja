@@ -19,11 +19,22 @@ class UserController extends Controller
                 return $query->where('name', 'LIKE', '%'. $keyword .'%')
                     ->orWhere('id', 'LIKE', '%'. $keyword .'%');
             })
+            ->when($request->name, function ($query, $name) {
+                return $query->where('name', $name);
+            })
             ->when(json_decode($request->sortBy), function ($query, $sortBy) {
                 return $query->orderBy($sortBy->sortBy, $sortBy->descending ? 'desc' : 'asc');
             });
 
+        if(empty($request->sortBy)){
+            $query->orderBy('updated_at', 'desc');
+        }
+
         return $query->paginate($perPage);
+    }
+
+    public function show(User $user){
+        return $user->only(['id', 'name', 'avatar', 'gender', 'avatar_url']);
     }
 
     public function store(Request $request){
@@ -40,15 +51,39 @@ class UserController extends Controller
         $strAvatarImageName = time().'.'.$request->avatar->getClientOriginalExtension(); // Might fail when there are multiple user created consequently.
         $request->file('avatar')->move('images/avatar/', $strAvatarImageName);
 
-        return User::create([
+        $user = User::create([
             'name' => $request->name,
             'avatar_file_original_name' => $request->avatar->getClientOriginalName(),
             'gender' => $request->gender,
             'avatar' => $strAvatarImageName
         ]);
+
+        return $this->show($user);
     }
 
-    public function delete(User $user){
+    public function update(User $user, Request $request){
+        $objValidatedData   =   Validator::make($request->all(), [
+            'gender' => 'required|in:Male,Female',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
+        ]);
+
+        if ($objValidatedData->fails()){
+            return $objValidatedData->errors();
+        }
+
+        if(!empty($request->avatar)){
+            $strAvatarImageName = time().'.'.$request->avatar->getClientOriginalExtension(); // Might fail when there are multiple user created consequently.
+            $request->file('avatar')->move('images/avatar/', $strAvatarImageName);
+            $user->avatar_file_original_name = $request->avatar->getClientOriginalName();
+            $user->avatar = $strAvatarImageName;
+        }
+
+        $user->gender = $request->gender;
+        $user->save();
+        return $this->show($user);
+    }
+
+    public function destroy(User $user){
         if($user->delete())
         {
             return [

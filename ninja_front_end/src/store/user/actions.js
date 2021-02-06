@@ -22,9 +22,11 @@ export async function createUser({ commit }, params = {}) {
 export async function deleteUser({ commit }, userId) {
   try {
     let response = await UserAgent.deleteUser(userId);
-    console.log(response.data);
-    return response;
+    if(response.data && response.data.code){
+      return true
+    }
   } catch (error) {
-    return error;
+    console.log(error);
+    return false;
   }
 }

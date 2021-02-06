@@ -1,9 +1,14 @@
 <template>
-  <q-dialog v-model="dialogState" full-width position="bottom">
+  <q-dialog
+    v-model="dialogState"
+    full-width
+    position="bottom"
+    @before-show="beforeShow"
+  >
     <q-card>
       <q-card-section style="padding: 10px 15px;">
         <div class="text-h5 middle-align" style="padding-left: 15px;">
-          Add User
+          {{ this.user ? "Edit User" : "Add User" }}
         </div>
 
         <q-btn
@@ -22,7 +27,7 @@
         style="max-height: 50vh;"
         class="middle-align scroll relative-center"
       >
-        <q-form @submit="onSubmit" class="q-gutter-md">
+        <q-form ref="userForm" class="q-gutter-md">
           <div class="row">
             <div class="col-md-8 col-sm-12">
               <q-input
@@ -32,11 +37,13 @@
                 full-width
                 lazy-rules
                 class="col-8"
+                :disable="user ? true : false"
                 :rules="[
                   val => (val && val.length > 0) || 'Please Enter Name',
                   val =>
                     (val && /^[A-Za-z-0-9_' ]+$/.test(val)) ||
-                    'Please enter characters only'
+                    'Name can be alpha numeric only',
+                  val => isUnique(val)
                 ]"
               />
             </div>
@@ -92,6 +99,16 @@
                   color="primary"
                 />
               </div>
+              <div style="display: none">
+                <q-file
+                  ref="userAvatar"
+                  v-model="userAvatar"
+                  label="Pick File"
+                  filled
+                  style="max-width: 120px; max-height: 100px;"
+                  @input="loadFileData"
+                />
+              </div>
               <div style="padding-top: 10px;">
                 <q-btn
                   label="Gallery"
@@ -99,17 +116,17 @@
                   color="primary"
                   @click="
                     () => {
-                      this.$refs.fileUpload.click();
+                      this.$refs.userAvatar.pickFiles();
                     }
                   "
                 />
-                <input
+                <!-- <input
                   ref="fileUpload"
                   style="display: none"
                   type="file"
                   id="fileUpload"
                   @change="loadFileData($event)"
-                />
+                /> -->
               </div>
             </div>
           </div>
@@ -119,7 +136,11 @@
       <q-separator />
 
       <q-card-actions align="right" class="middle-align">
-        <q-btn label="Create" @click="createUser" color="primary" />
+        <q-btn
+          :label="user ? 'Modify' : 'Create'"
+          @click="createUser"
+          color="primary"
+        />
         <q-btn
           label="Cancel"
           v-close-popup
@@ -135,15 +156,22 @@
 import { mapGetters } from "vuex";
 
 export default {
-  name: "App",
+  props: {
+    callback: {
+      type: Function,
+      default: () => {}
+    }
+  },
   data() {
     return {
-      strGender: "",
+      strGender: "Male",
       isFresh: false,
       dialog: "createNinjaUser",
       name: null,
       capturedImg: null,
-      reader: new FileReader()
+      reader: new FileReader(),
+      userAvatar: null,
+      avatarUrl: null
     };
   },
   computed: {
@@ -166,8 +194,13 @@ export default {
       var formData = new FormData();
       formData.append("name", this.name);
       formData.append("gender", this.strGender);
-      formData.append("avatar", this.dataURLtoFile(this.capturedImg));
+      if (this.capturedImg) {
+        formData.append("avatar", this.dataURLtoFile(this.capturedImg));
+      }
       return formData;
+    },
+    user() {
+      return this.properties.user || null;
     }
   },
 
@@ -185,15 +218,42 @@ export default {
       return new File([u8arr], filename, { type: mime });
     },
     createUser() {
-      this.showSuccess("User created successfully.");
+      this.$refs.userForm.validate().then(isValid => {
+        if (!this.capturedImg && !this.user) {
+          alert("user avatar missing");
+          return;
+        }
+
+        this.$store.commit("common/SET_FULL_LOADING", true);
+        this.$store
+          .dispatch("user/createUser", this.objRequest)
+          .then(response => {
+            if (response && response.status == 200) {
+              this.showSuccess(
+                this.user
+                  ? "User Modified Successfully."
+                  : "User created successfully."
+              );
+              this.callback();
+              this.dialogState = false;
+            } else {
+              this.showSuccess(
+                this.user
+                  ? "Error occurred while modifying a user."
+                  : "Error occurred while creation a user."
+              );
+            }
+            this.$store.commit("common/SET_FULL_LOADING", false);
+          });
+      });
+
       return;
       // console.log(this.objRequest);
       // return;
-      this.$store.dispatch("user/createUser", this.objRequest);
     },
-    loadFileData(event) {
-      if (event.target.files[0]) {
-        this.reader.readAsDataURL(event.target.files[0]);
+    loadFileData(objFile) {
+      if (objFile) {
+        this.reader.readAsDataURL(objFile);
       }
     },
     onSubmit() {
@@ -205,6 +265,32 @@ export default {
     onCapture(imageData) {
       console.log("capture data", imageData);
       this.capturedImg = imageData;
+    },
+    async isUnique(name) {
+      let response = await this.$store.dispatch("user/users", {
+        name
+      });
+
+      if (
+        response.status === 200 &&
+        (!response.data.total ||
+          (response.data.total == 1 &&
+            response.data.data[0].id === this.user.id))
+      ) {
+        return true;
+      }
+      return "Name already used by other";
+    },
+    beforeShow() {
+      this.resetData();
+    },
+    resetData() {
+      let user = this.properties.user || {};
+      this.name = user.name || null;
+      this.strGender = user.gender || "Male";
+      this.capturedImg = null;
+      this.avatarUrl = user.avatar_url || null;
+      this.userAvatar = null;
     }
   },
   mounted() {

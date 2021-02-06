@@ -15,7 +15,7 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 500)->unique();
+            $table->string('name', 500);
             $table->enum('gender', ['Male', 'Female'])->nullable();
             $table->string('avatar_file_original_name')->nullable();
             $table->text('avatar')->nullable();

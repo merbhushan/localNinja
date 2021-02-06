@@ -23,6 +23,7 @@
           v-model="filter"
           placeholder="Search"
           dark
+          clearable
         >
           <template v-slot:append>
             <q-icon name="search" />
@@ -34,10 +35,17 @@
           text-color="black"
           label="Add New"
           @click="
-            $store.commit('showcase/updateDialogState', {
-              dialog: 'createNinjaUser',
-              val: true
-            })
+            () => {
+              $store.commit('showcase/SET_DIALOG_PROPERTIES', {
+                dialog: 'createNinjaUser',
+                properties: {},
+                refresh: true
+              });
+              $store.commit('showcase/updateDialogState', {
+                dialog: 'createNinjaUser',
+                val: true
+              });
+            }
           "
         />
       </template>
@@ -46,7 +54,13 @@
         <q-tr :props="props">
           <template v-for="(col, index) in props.cols">
             <q-td v-if="col.name == 'action'" style="text-align: center;">
-              <q-btn flat color="standard" round icon="edit" />
+              <q-btn
+                flat
+                color="standard"
+                @click="editUser(props.row)"
+                round
+                icon="edit"
+              />
               <q-btn
                 flat
                 color="standard"
@@ -86,14 +100,17 @@
         </q-tr>
       </template>
     </q-table>
-    <CreateUserDialog />
+    <CreateUserDialog :callback="createUserCallback" />
     <CaptureImage />
+    <FullscreenLoader :showing="showFullLoading" />
   </div>
 </template>
 
 <script>
 import CreateUserDialog from "src/components/Dialog/CreateUser";
 import CaptureImage from "src/components/Dialog/CaptureImage";
+import CustomConfirm from "src/components/Common/CustomConfirm";
+import { mapGetters } from "vuex";
 
 export default {
   components: { CreateUserDialog, CaptureImage },
@@ -142,6 +159,9 @@ export default {
       data: []
     };
   },
+  computed: {
+    ...mapGetters("common", ["showFullLoading"])
+  },
   mounted() {
     // get initial data from server (1st page)
     this.onRequest({
@@ -185,10 +205,27 @@ export default {
       return;
     },
     deleteUser(data) {
-      this.$store.dispatch("user/deleteUser", data.id).then(response => {
-        console.log(response);
-      });
-      this.showSuccess("user deleted successfully");
+      this.$q
+        .dialog({
+          component: CustomConfirm,
+          parent: this,
+          text: `Are you sure you want to remove ${data.name}?`
+        })
+        .onOk(() => {
+          this.$store.commit("common/SET_FULL_LOADING", true);
+          this.$store.dispatch("user/deleteUser", data.id).then(response => {
+            if (response) {
+              this.showSuccess("User removed successfully.");
+              this.onRequest({
+                filter: this.filter,
+                pagination: this.pagination
+              });
+            } else {
+              this.showError("Error occurred while removing a user.");
+            }
+            this.$store.commit("common/SET_FULL_LOADING", false);
+          });
+        });
     },
     // emulate ajax call
     // SELECT * FROM ... WHERE...LIMIT...
@@ -225,6 +262,27 @@ export default {
         }
       });
       return count;
+    },
+
+    editUser(data) {
+      this.$store.commit("showcase/SET_DIALOG_PROPERTIES", {
+        dialog: "createNinjaUser",
+        properties: {
+          user: data
+        },
+        refresh: true
+      });
+      this.$store.commit("showcase/updateDialogState", {
+        dialog: "createNinjaUser",
+        val: true
+      });
+    },
+
+    createUserCallback() {
+      this.onRequest({
+        filter: this.filter,
+        pagination: this.pagination
+      });
     }
   }
 };

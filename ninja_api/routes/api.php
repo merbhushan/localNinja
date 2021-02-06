@@ -14,11 +14,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
 Route::get('ninja/leader-board', [App\Http\Controllers\API\v1\NinjaLeaderBoardController::class, 'index']);
-Route::get('ninja/users', [App\Http\Controllers\API\v1\UserController::class, 'index']);
-Route::post('ninja/users', [App\Http\Controllers\API\v1\UserController::class, 'store']);
-Route::delete('ninja/users/{user}', [App\Http\Controllers\API\v1\UserController::class, 'delete']);
+Route::apiResource('ninja/users', App\Http\Controllers\API\v1\UserController::class)->except([
+    'update'
+]);
+
+// Route::get('ninja/users', [App\Http\Controllers\API\v1\UserController::class, 'index']);
+Route::post('ninja/users/{user}', [App\Http\Controllers\API\v1\UserController::class, 'update']);
+
+// Route::put('ninja/users', [App\Http\Controllers\API\v1\UserController::class, 'store']);
+// Route::delete('ninja/users/{user}', [App\Http\Controllers\API\v1\UserController::class, 'delete']);
