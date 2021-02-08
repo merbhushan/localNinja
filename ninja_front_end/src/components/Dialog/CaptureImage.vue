@@ -32,7 +32,7 @@
           :options="devices"
           option-value="deviceId"
           option-label="label"
-          label="Select Device"
+          label="Device"
           map-options
         />
 
@@ -73,7 +73,7 @@
         <q-btn
           label="Save & Continue"
           @click="saveAndContinue"
-          :disabled="blnDisplayError || !capturedImg"
+          :disabled="blnDisplayError || !img"
           color="primary"
           :disable="!img"
         />
@@ -157,7 +157,6 @@ export default {
       this.onStop();
     },
     saveAndContinue() {
-      console.log(this.properties);
       if (this.properties && this.properties.continue) {
         this.properties.continue(this.img);
       }
@@ -171,10 +170,10 @@ export default {
       this.img = this.$refs.webcam.capture();
     },
     onStarted(stream) {
-      console.log("On Started Event", stream);
+      // console.log("On Started Event", stream);
     },
     onStopped(stream) {
-      console.log("On Stopped Event", stream);
+      // console.log("On Stopped Event", stream);
     },
     onStop() {
       this.$refs.webcam.stop();
@@ -184,16 +183,16 @@ export default {
     },
     onError(error) {
       this.blnDisplayError = true;
-      console.log("On Error Event", error);
+      // console.log("On Error Event", error);
     },
     onCameras(cameras) {
       this.devices = cameras;
-      console.log("On Cameras Event", cameras);
+      // console.log("On Cameras Event", cameras);
     },
     onCameraChange(deviceId) {
       this.deviceId = deviceId;
       this.camera = deviceId;
-      console.log("On Camera Change Event", deviceId);
+      // console.log("On Camera Change Event", deviceId);
     }
   }
 };

@@ -18,7 +18,7 @@ export async function createUser({ commit }, params = {}) {
   }
 }
 
-export async function modifyUser({ commit }, {params, userId}) {
+export async function modifyUser({ commit }, { params, userId }) {
   try {
     let response = await UserAgent.updateUser(userId, params);
     return response;
@@ -30,8 +30,8 @@ export async function modifyUser({ commit }, {params, userId}) {
 export async function deleteUser({ commit }, userId) {
   try {
     let response = await UserAgent.deleteUser(userId);
-    if(response.data && response.data.code){
-      return true
+    if (response.data && response.data.code) {
+      return true;
     }
   } catch (error) {
     console.log(error);

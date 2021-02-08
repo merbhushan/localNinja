@@ -8,7 +8,7 @@
     <q-card>
       <q-card-section style="padding: 10px 15px;">
         <div class="text-h5 middle-align" style="padding-left: 15px;">
-          {{ this.user ? "Edit User" : "Add User" }}
+          {{ this.user ? "Modify User" : "Add User" }}
         </div>
 
         <q-btn
@@ -146,7 +146,7 @@
       <q-card-actions align="right" class="middle-align">
         <q-btn
           :label="user ? 'Modify' : 'Create'"
-          @click="createUser"
+          @click="createOrModifyUser"
           color="primary"
         />
         <q-btn
@@ -226,8 +226,12 @@ export default {
       let filename = this.name.trim() + "." + mime.split("/")[1];
       return new File([u8arr], filename, { type: mime });
     },
-    createUser() {
+    createOrModifyUser() {
       this.$refs.userForm.validate().then(isValid => {
+        if (!isValid) {
+          return;
+        }
+
         if (!this.capturedImg && !this.user) {
           this.avtar_error_message = "Please select user's avatar.";
           return;
@@ -238,13 +242,13 @@ export default {
         this.$store.commit("common/SET_FULL_LOADING", true);
 
         let userEvent = "user/createUser";
-        let params = {};
+        let params = null;
 
         if (this.user && this.user.id) {
           userEvent = "user/modifyUser";
           params = { params: this.objRequest, userId: this.user.id };
         } else {
-          params = { ...this.objRequest };
+          params = this.objRequest;
         }
 
         this.$store.dispatch(userEvent, params).then(response => {
@@ -268,22 +272,13 @@ export default {
       });
 
       return;
-      // console.log(this.objRequest);
-      // return;
     },
     loadFileData(objFile) {
       if (objFile) {
         this.reader.readAsDataURL(objFile);
       }
     },
-    onSubmit() {
-      console.log("on submit created");
-    },
-    onReset() {
-      console.log("on reset created");
-    },
     onCapture(imageData) {
-      console.log("capture data", imageData);
       this.capturedImg = imageData;
     },
     async isUnique(name) {
@@ -300,7 +295,7 @@ export default {
       ) {
         return true;
       }
-      return "Name already used by other";
+      return "This name is already taken";
     },
     beforeShow() {
       this.resetData();
