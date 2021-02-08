@@ -69,9 +69,17 @@
 
           <div class="row">
             <div class="col-md-6 col-sm-12">
+              <span v-if="avtar_error_message" style="color: red;">
+                Please select user avtar.
+              </span>
               <q-avatar square class="ration-43">
-                <q-img v-if="capturedImg" :src="capturedImg" />
-                <q-img v-else src="https://via.placeholder.com/240" />
+                <q-img
+                  :src="
+                    capturedImg ||
+                      avatarUrl ||
+                      'https://via.placeholder.com/240'
+                  "
+                />
               </q-avatar>
             </div>
             <div class="col-md-6 col-sm-12">
@@ -164,6 +172,7 @@ export default {
   },
   data() {
     return {
+      avtar_error_message: null,
       strGender: "Male",
       isFresh: false,
       dialog: "createNinjaUser",
@@ -220,31 +229,42 @@ export default {
     createUser() {
       this.$refs.userForm.validate().then(isValid => {
         if (!this.capturedImg && !this.user) {
-          alert("user avatar missing");
+          this.avtar_error_message = "Please select user's avatar.";
           return;
+        } else {
+          this.avtar_error_message = "";
         }
 
         this.$store.commit("common/SET_FULL_LOADING", true);
-        this.$store
-          .dispatch("user/createUser", this.objRequest)
-          .then(response => {
-            if (response && response.status == 200) {
-              this.showSuccess(
-                this.user
-                  ? "User Modified Successfully."
-                  : "User created successfully."
-              );
-              this.callback();
-              this.dialogState = false;
-            } else {
-              this.showSuccess(
-                this.user
-                  ? "Error occurred while modifying a user."
-                  : "Error occurred while creation a user."
-              );
-            }
-            this.$store.commit("common/SET_FULL_LOADING", false);
-          });
+
+        let userEvent = "user/createUser";
+        let params = {};
+
+        if (this.user && this.user.id) {
+          userEvent = "user/modifyUser";
+          params = { params: this.objRequest, userId: this.user.id };
+        } else {
+          params = { ...this.objRequest };
+        }
+
+        this.$store.dispatch(userEvent, params).then(response => {
+          if (response && response.status == 200) {
+            this.showSuccess(
+              this.user
+                ? "User Modified Successfully."
+                : "User created successfully."
+            );
+            this.callback();
+            this.dialogState = false;
+          } else {
+            this.showSuccess(
+              this.user
+                ? "Error occurred while modifying a user."
+                : "Error occurred while creation a user."
+            );
+          }
+          this.$store.commit("common/SET_FULL_LOADING", false);
+        });
       });
 
       return;
@@ -274,7 +294,8 @@ export default {
       if (
         response.status === 200 &&
         (!response.data.total ||
-          (response.data.total == 1 &&
+          (this.user &&
+            response.data.total == 1 &&
             response.data.data[0].id === this.user.id))
       ) {
         return true;
@@ -291,6 +312,7 @@ export default {
       this.capturedImg = null;
       this.avatarUrl = user.avatar_url || null;
       this.userAvatar = null;
+      this.avtar_error_message = null;
     }
   },
   mounted() {

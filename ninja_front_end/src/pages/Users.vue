@@ -14,6 +14,13 @@
       flat
       dark
     >
+      <template v-slot:no-data="{ icon, message, filter }">
+        <div class="full-width row flex-center text-white q-gutter-sm">
+          <q-icon size="2em" name="sentiment_dissatisfied" />
+          <span> Well this is sad... {{ message }} </span>
+          <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
+        </div>
+      </template>
       <template v-slot:top-right>
         <q-input
           dense
@@ -73,11 +80,7 @@
               <q-img
                 :src="props.row.avatar_url"
                 spinner-color="white"
-                v-if="
-                  false &&
-                    props.row.avatar_url &&
-                    props.row.avatar_url.length > 0
-                "
+                v-if="props.row.avatar_url"
                 style="height: 35px; width: 35px; border-radius: 50%;"
               />
               <q-img
@@ -291,7 +294,7 @@ export default {
 <style lang="sass">
 .my-sticky-header-table
   /* height or max-height is important */
-  height: calc(100vh - 50px)
+  max-height: calc(100vh - 50px)
   max-width: 1280px
   margin: 0 auto
 

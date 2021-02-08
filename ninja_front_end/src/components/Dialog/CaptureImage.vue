@@ -73,7 +73,7 @@
         <q-btn
           label="Save & Continue"
           @click="saveAndContinue"
-          :disabled="blnDisplayError"
+          :disabled="blnDisplayError || !capturedImg"
           color="primary"
           :disable="!img"
         />

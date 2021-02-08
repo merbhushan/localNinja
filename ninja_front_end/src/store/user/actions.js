@@ -12,7 +12,15 @@ export async function users({ commit }, params = {}) {
 export async function createUser({ commit }, params = {}) {
   try {
     let response = await UserAgent.createUser(params);
-    console.log(response);
+    return response;
+  } catch (error) {
+    return error;
+  }
+}
+
+export async function modifyUser({ commit }, {params, userId}) {
+  try {
+    let response = await UserAgent.updateUser(userId, params);
     return response;
   } catch (error) {
     return error;
