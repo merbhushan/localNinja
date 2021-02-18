@@ -37,7 +37,7 @@
         />
 
         <div class="row q-pt-sm">
-          <div class="col-sm-12 col-md-6 border">
+          <div class="col-sm-6 border">
             <vue-web-cam
               ref="webcam"
               height="300"
@@ -50,7 +50,7 @@
               @camera-change="onCameraChange"
             />
           </div>
-          <div class="col-sm-12 col-md-6" v-if="img">
+          <div class="col-sm-6" v-if="img">
             <q-img
               height="300px"
               width="400px"

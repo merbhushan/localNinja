@@ -40,7 +40,7 @@
                 ]"
               />
             </div>
-            <div
+            <!-- <div
               class="col-md-4 col-sm-12"
               style="text-align: center; padding: 12px;"
             >
@@ -57,7 +57,7 @@
                 val="FEMALE"
                 label="Female"
               />
-            </div>
+            </div> -->
           </div>
 
           <div class="row">
@@ -138,7 +138,7 @@ export default {
   name: "App",
   data() {
     return {
-      strGender: "",
+      // strGender: "",
       isFresh: false,
       dialog: "createNinjaUser",
       name: null,

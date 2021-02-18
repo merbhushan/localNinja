@@ -50,7 +50,13 @@
               <q-btn flat color="standard" round icon="delete" />
             </q-td>
             <q-td v-else-if="col.name == 'avatar'" style="text-align: center;">
-              <q-img
+              <q-avatar
+                style="background-color: #dadada; color: #0d223b;"
+                size="40px"
+              >
+                {{ col.value.charAt(0).toUpperCase() }}
+              </q-avatar>
+              <!-- <q-img
                 src="/images/user-avatars/boy.png"
                 spinner-color="white"
                 v-if="Math.floor(Math.random() * 3) == 2"
@@ -61,7 +67,7 @@
                 v-else
                 spinner-color="white"
                 style="height: 35px; width: 35px; border-radius: 50%;"
-              />
+              /> -->
             </q-td>
             <q-td v-else>
               {{ col.value }}
@@ -102,6 +108,7 @@ export default {
         {
           name: "avatar",
           required: true,
+          field: "name",
           label: "Avatar",
           headerStyle: "width: 5%;",
           align: "center",
