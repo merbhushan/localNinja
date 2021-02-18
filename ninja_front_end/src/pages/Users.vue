@@ -14,6 +14,13 @@
       flat
       dark
     >
+      <template v-slot:no-data="{ icon, message, filter }">
+        <div class="full-width row flex-center text-white q-gutter-sm">
+          <q-icon size="2em" name="sentiment_dissatisfied" />
+          <span> Well this is sad... {{ message }} </span>
+          <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
+        </div>
+      </template>
       <template v-slot:top-right>
         <q-input
           dense
@@ -23,6 +30,7 @@
           v-model="filter"
           placeholder="Search"
           dark
+          clearable
         >
           <template v-slot:append>
             <q-icon name="search" />
@@ -34,10 +42,17 @@
           text-color="black"
           label="Add New"
           @click="
-            $store.commit('showcase/updateDialogState', {
-              dialog: 'createNinjaUser',
-              val: true
-            })
+            () => {
+              $store.commit('showcase/SET_DIALOG_PROPERTIES', {
+                dialog: 'createNinjaUser',
+                properties: {},
+                refresh: true
+              });
+              $store.commit('showcase/updateDialogState', {
+                dialog: 'createNinjaUser',
+                val: true
+              });
+            }
           "
         />
       </template>
@@ -46,25 +61,45 @@
         <q-tr :props="props">
           <template v-for="(col, index) in props.cols">
             <q-td v-if="col.name == 'action'" style="text-align: center;">
-              <q-btn flat color="standard" round icon="edit" />
-              <q-btn flat color="standard" round icon="delete" />
+              <q-btn
+                flat
+                color="standard"
+                @click="editUser(props.row)"
+                round
+                icon="edit"
+              />
+              <q-btn
+                flat
+                color="standard"
+                @click="deleteUser(props.row)"
+                round
+                icon="delete"
+              />
             </q-td>
             <q-td v-else-if="col.name == 'avatar'" style="text-align: center;">
-              <q-avatar
-                style="background-color: #dadada; color: #0d223b;"
-                size="40px"
-              >
-                {{ col.value.charAt(0).toUpperCase() }}
-              </q-avatar>
-              <!-- <q-img
-                src="/images/user-avatars/boy.png"
+              <q-img
+                :src="props.row.avatar_url"
                 spinner-color="white"
-                v-if="Math.floor(Math.random() * 3) == 2"
+                v-if="props.row.avatar_url"
+                style="height: 35px; width: 35px; border-radius: 50%;"
+              />
+              <q-avatar
+                v-else
+                style="background-color: #dadada; color: #0d223b;"
+                size="35px"
+              >
+                {{ props.row.name.charAt(0).toUpperCase() }}
+              </q-avatar>
+              <!--
+              <q-img
+                v-else-if="props.row.gender == 'Female'"
+                src="/images/user-avatars/girl.png"
+                spinner-color="white"
                 style="height: 35px; width: 35px; border-radius: 50%;"
               />
               <q-img
-                src="/images/user-avatars/girl.png"
                 v-else
+                src="/images/user-avatars/boy.png"
                 spinner-color="white"
                 style="height: 35px; width: 35px; border-radius: 50%;"
               /> -->
@@ -76,14 +111,17 @@
         </q-tr>
       </template>
     </q-table>
-    <CreateUserDialog />
+    <CreateUserDialog :callback="createUserCallback" />
     <CaptureImage />
+    <FullscreenLoader :showing="showFullLoading" />
   </div>
 </template>
 
 <script>
 import CreateUserDialog from "src/components/Dialog/CreateUser";
 import CaptureImage from "src/components/Dialog/CaptureImage";
+import CustomConfirm from "src/components/Common/CustomConfirm";
+import { mapGetters } from "vuex";
 
 export default {
   components: { CreateUserDialog, CaptureImage },
@@ -133,6 +171,9 @@ export default {
       data: []
     };
   },
+  computed: {
+    ...mapGetters("common", ["showFullLoading"])
+  },
   mounted() {
     // get initial data from server (1st page)
     this.onRequest({
@@ -175,7 +216,29 @@ export default {
       });
       return;
     },
-
+    deleteUser(data) {
+      this.$q
+        .dialog({
+          component: CustomConfirm,
+          parent: this,
+          text: `Are you sure you want to remove ${data.name}?`
+        })
+        .onOk(() => {
+          this.$store.commit("common/SET_FULL_LOADING", true);
+          this.$store.dispatch("user/deleteUser", data.id).then(response => {
+            if (response) {
+              this.showSuccess("User removed successfully.");
+              this.onRequest({
+                filter: this.filter,
+                pagination: this.pagination
+              });
+            } else {
+              this.showError("Error occurred while removing a user.");
+            }
+            this.$store.commit("common/SET_FULL_LOADING", false);
+          });
+        });
+    },
     // emulate ajax call
     // SELECT * FROM ... WHERE...LIMIT...
     fetchFromServer(startRow, count, filter, sortBy, descending) {
@@ -211,6 +274,27 @@ export default {
         }
       });
       return count;
+    },
+
+    editUser(data) {
+      this.$store.commit("showcase/SET_DIALOG_PROPERTIES", {
+        dialog: "createNinjaUser",
+        properties: {
+          user: data
+        },
+        refresh: true
+      });
+      this.$store.commit("showcase/updateDialogState", {
+        dialog: "createNinjaUser",
+        val: true
+      });
+    },
+
+    createUserCallback() {
+      this.onRequest({
+        filter: this.filter,
+        pagination: this.pagination
+      });
     }
   }
 };
@@ -219,7 +303,7 @@ export default {
 <style lang="sass">
 .my-sticky-header-table
   /* height or max-height is important */
-  height: calc(100vh - 50px)
+  max-height: calc(100vh - 50px)
   max-width: 1280px
   margin: 0 auto
 

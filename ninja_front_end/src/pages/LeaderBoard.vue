@@ -21,7 +21,10 @@ export default {
         {
           name: "index",
           label: "Rank",
-          field: "index"
+          field: "index",
+          headerStyle:
+            "font-size: xx-large; text-align: center; background-color: #0D223B;",
+          style: "font-size: x-large; text-align: center; "
         },
         {
           name: "name",

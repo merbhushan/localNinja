@@ -18,6 +18,7 @@ class CreateScoresTable extends Migration
             $table->foreignId('user_id');
             $table->bigInteger('score');
             $table->timestamps();
+            $table->index(['user_id']);
         });
     }
 

@@ -1,2 +1,1 @@
-export function someGetter (/* state */) {
-}
+export const showFullLoading = (state) => state.showFullLoading
