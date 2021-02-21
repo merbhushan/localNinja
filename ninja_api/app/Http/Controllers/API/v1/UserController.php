@@ -14,7 +14,7 @@ class UserController extends Controller
     public function index(Request $request){
         $perPage = $request->per_page ? $request->per_page : 20;
 
-        $query = User::select('id', 'name', 'avatar', 'gender')
+        $query = User::select('id', 'name', 'avatar')
             ->when($request->filter, function ($query, $keyword) {
                 return $query->where('name', 'LIKE', '%'. $keyword .'%')
                     ->orWhere('id', 'LIKE', '%'. $keyword .'%');
@@ -34,13 +34,12 @@ class UserController extends Controller
     }
 
     public function show(User $user){
-        return $user->only(['id', 'name', 'avatar', 'gender', 'avatar_url']);
+        return $user->only(['id', 'name', 'avatar', 'avatar_url']);
     }
 
     public function store(Request $request){
         $objValidatedData   =   Validator::make($request->all(), [
             'name' => 'required|max:255',
-            'gender' => 'required|in:Male,Female',
             'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
         ]);
 
@@ -54,7 +53,6 @@ class UserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'avatar_file_original_name' => $request->avatar->getClientOriginalName(),
-            'gender' => $request->gender,
             'avatar' => $strAvatarImageName
         ]);
 
@@ -63,7 +61,6 @@ class UserController extends Controller
 
     public function update(User $user, Request $request){
         $objValidatedData   =   Validator::make($request->all(), [
-            'gender' => 'required|in:Male,Female',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
         ]);
 
@@ -76,9 +73,9 @@ class UserController extends Controller
             $request->file('avatar')->move('images/avatar/', $strAvatarImageName);
             $user->avatar_file_original_name = $request->avatar->getClientOriginalName();
             $user->avatar = $strAvatarImageName;
+            $user->is_avatar_processed = 0;
         }
 
-        $user->gender = $request->gender;
         $user->save();
         return $this->show($user);
     }
