@@ -40,6 +40,9 @@
 import { scroll } from "quasar";
 const { getScrollPosition, setScrollPosition, getScrollHeight } = scroll;
 
+const WAITING_TIME_WHEN_NO_SCROLL_PRESENT = 10000;
+const WAITING_TIME_WHEN_SCROLL_PRESENT = 5000;
+
 export default {
   props: {
     data: {
@@ -88,10 +91,24 @@ export default {
     };
   },
   mounted() {
-    this.scrollToEnd();
+    const targetElement = document.querySelector(".q-table__middle");
+    // Client height is the height of the screen
+    // Scroll height is the height of the q-table only.
+    // If the later one is equal or greater then we need to refresh the data by ourselves (no scrolling will take effect).
+
+    if (
+      document.querySelector(".q-table__middle").scrollHeight <=
+      document.querySelector(".q-table__middle").clientHeight
+    ) {
+      setTimeout(() => {
+        this.loading = true;
+        this.refreshData();
+      }, WAITING_TIME_WHEN_NO_SCROLL_PRESENT);
+    } else {
+      this.scrollToEnd();
+    }
 
     document.querySelector(".q-table__middle").onscroll = event => {
-      const targetElement = document.querySelector(".q-table__middle");
       const targetHeight = getScrollHeight(targetElement);
       if (
         getScrollPosition(targetElement) + 1 >
@@ -101,7 +118,7 @@ export default {
           this.loading = true;
           setScrollPosition(targetElement, 0, 100);
           this.refreshData();
-        }, 5000);
+        }, WAITING_TIME_WHEN_SCROLL_PRESENT);
       }
     };
   },

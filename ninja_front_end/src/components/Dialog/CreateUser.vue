@@ -70,7 +70,7 @@
           <div class="row">
             <div class="col-md-7 col-sm-12">
               <span v-if="avtar_error_message" style="color: red;">
-                Please select user avtar.
+                Please select user avatar.
               </span>
               <q-avatar square class="ration-43">
                 <q-img
