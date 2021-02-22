@@ -29,7 +29,7 @@
       >
         <q-form ref="userForm" class="q-gutter-md">
           <div class="row">
-            <div class="col-md-8 col-sm-12">
+            <div class="col-md-12 col-sm-12">
               <q-input
                 filled
                 v-model="name"
@@ -68,7 +68,7 @@
           </div>
 
           <div class="row">
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-7 col-sm-12">
               <span v-if="avtar_error_message" style="color: red;">
                 Please select user avtar.
               </span>
@@ -82,7 +82,7 @@
                 />
               </q-avatar>
             </div>
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-5 col-sm-12">
               <div>
                 <q-btn
                   label="Capture"
