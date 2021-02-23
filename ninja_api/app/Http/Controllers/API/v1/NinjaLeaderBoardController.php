@@ -10,7 +10,7 @@ use App\Models\Score;
 class NinjaLeaderBoardController extends Controller
 {
     public function index(Request $request){
-        return  Score::orderBy('score', 'desc')
+        return  Score::orderBy('score')
             ->select('id', 'user_id', 'score')
             ->with('user:id,name')
             ->limit(50)

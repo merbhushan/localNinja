@@ -88,30 +88,47 @@ export default {
     };
   },
   mounted() {
-    this.scrollToEnd();
+    
+    const targetElement = document.querySelector(".q-table__middle");
+    const targetHeight = getScrollHeight(targetElement);
+    const isScrollPresent = getScrollPosition(targetElement) + 1 < targetHeight - targetElement.clientHeight;
 
-    document.querySelector(".q-table__middle").onscroll = event => {
-      const targetElement = document.querySelector(".q-table__middle");
-      const targetHeight = getScrollHeight(targetElement);
-      if (
-        getScrollPosition(targetElement) + 1 >
-        targetHeight - targetElement.clientHeight
-      ) {
-        setTimeout(() => {
-          this.loading = true;
-          setScrollPosition(targetElement, 0, 100);
-          this.refreshData();
-        }, 5000);
-      }
-    };
+    if(isScrollPresent)
+    {
+      this.scrollToEnd();
+    
+      document.querySelector(".q-table__middle").onscroll = event => {
+        // const targetElement = document.querySelector(".q-table__middle");
+        // const targetHeight = getScrollHeight(targetElement);
+        if (
+          getScrollPosition(targetElement) + 1 >
+          targetHeight - targetElement.clientHeight
+        ) {
+          setTimeout(() => {
+            this.loading = true;
+            setScrollPosition(targetElement, 0, 100);
+            this.refreshData();
+          }, 5000);
+        }
+      };
+    }
+    else{
+      setTimeout(() => {
+            this.loading = true;
+            setScrollPosition(targetElement, 0, 100);
+            this.refreshData();
+          }, 5000);
+    }
+    
   },
   methods: {
     scrollToEnd() {
+      console.log();
       setTimeout(async () => {
         const targetElement = document.querySelector(".q-table__middle");
         const targetHeight = getScrollHeight(targetElement);
         // document.querySelector("table tr").clientHeight * 50;
-        const scrollTime = 45 * 1000;
+        const scrollTime = (45*this.data.length/50) * 1000;
         setScrollPosition(targetElement, targetHeight, parseInt(scrollTime));
       }, 2000);
     }
