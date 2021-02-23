@@ -1,5 +1,5 @@
 <template>
-  <Loader v-if="loading" />
+  <Loader v-if="loading || !data.length" />
   <Listing v-else :data="data" :refreshData="refreshData" />
 </template>
 
