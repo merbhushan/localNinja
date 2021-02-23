@@ -40,6 +40,9 @@
 import { scroll } from "quasar";
 const { getScrollPosition, setScrollPosition, getScrollHeight } = scroll;
 
+const WAITING_TIME_WHEN_NO_SCROLL_PRESENT = 10000;
+const WAITING_TIME_WHEN_SCROLL_PRESENT = 5000;
+
 export default {
   props: {
     data: {
@@ -88,7 +91,6 @@ export default {
     };
   },
   mounted() {
-    
     const targetElement = document.querySelector(".q-table__middle");
     const targetHeight = getScrollHeight(targetElement);
     const isScrollPresent = getScrollPosition(targetElement) + 1 < targetHeight - targetElement.clientHeight;
@@ -119,7 +121,6 @@ export default {
             this.refreshData();
           }, 5000);
     }
-    
   },
   methods: {
     scrollToEnd() {
